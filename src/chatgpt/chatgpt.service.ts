@@ -20,7 +20,7 @@ export class ChatGPTService {
         {
           role: 'system',
           content:
-            'You are a medidacl doctor specialized in birth. You are giving overal tips in the pregnancy process',
+            'You are a medical doctor specialized in birth. You are giving overal tips in the pregnancy process',
         },
         { role: 'user', content: userMessage },
       ],
