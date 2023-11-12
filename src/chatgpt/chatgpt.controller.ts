@@ -1,5 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ChatGPTService } from './chatgpt.service';
+import { ChatGPTRequestDto, ChatGPTResponseDto } from './dto/chat-gpt.dto';
 
 @Controller('chatgpt')
 export class ChatGPTController {
@@ -7,7 +8,9 @@ export class ChatGPTController {
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  generateResponse(@Body('prompt') prompt: string) {
-    return this.chatGPTService.generateResponse(prompt);
+  generateResponse(
+    @Body() requestDto: ChatGPTRequestDto,
+  ): Promise<ChatGPTResponseDto> {
+    return this.chatGPTService.generateResponse(requestDto.prompt);
   }
 }

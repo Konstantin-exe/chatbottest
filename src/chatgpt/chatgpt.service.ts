@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OpenAI } from 'openai';
+import { ChatGPTResponseDto } from './dto/chat-gpt.dto';
 
 @Injectable()
 export class ChatGPTService {
@@ -13,7 +14,7 @@ export class ChatGPTService {
     });
   }
 
-  async generateResponse(userMessage: string): Promise<any> {
+  async generateResponse(userMessage: string): Promise<ChatGPTResponseDto> {
     const params: OpenAI.Chat.ChatCompletionCreateParams = {
       messages: [
         {
@@ -30,7 +31,9 @@ export class ChatGPTService {
     try {
       const chatCompletion: OpenAI.Chat.ChatCompletion =
         await this.openai.chat.completions.create(params);
-      return chatCompletion.choices[0].message;
+      return {
+        message: chatCompletion.choices[0].message,
+      } as ChatGPTResponseDto;
     } catch (error) {
       this.logger.error(
         `Failed to generate response: ${JSON.stringify(
