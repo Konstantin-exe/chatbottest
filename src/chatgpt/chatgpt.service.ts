@@ -1,46 +1,43 @@
-import { Injectable } from '@nestjs/common';
-import { AxiosError, AxiosResponse } from 'axios';
-import { Observable, catchError } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
+import { Injectable, Logger } from '@nestjs/common';
+import { OpenAI } from 'openai';
 
 @Injectable()
 export class ChatGPTService {
-  private readonly apiKey: string;
-  private readonly apiUrl: string;
+  private readonly openai: OpenAI;
+  private readonly logger = new Logger(ChatGPTService.name);
 
-  constructor(private readonly httpService: HttpService) {
-    this.apiKey = process.env.OPENAI_API_KEY || '';
-    this.apiUrl = 'https://api.openai.com/v1/chat/completions';
+  constructor() {
+    this.openai = new OpenAI({
+      organization: 'org-ztnDerKbXUUCGfR79oHzetip',
+      apiKey: process.env.OPENAI_API_KEY,
+    });
   }
 
-  generateResponse(prompt: string): Observable<AxiosResponse> {
-    const data = {
-      model: 'gpt-3.5-turbo',
+  async generateResponse(userMessage: string): Promise<any> {
+    const params: OpenAI.Chat.ChatCompletionCreateParams = {
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful assistant.',
+          content:
+            'You are a medidacl doctor specialized in birth. You are giving overal tips in the pregnancy process',
         },
-        {
-          role: 'user',
-          content: prompt,
-        },
+        { role: 'user', content: userMessage },
       ],
-      prompt: prompt,
-
-      temperature: 1,
+      model: 'gpt-3.5-turbo',
+      temperature: 0.9,
     };
 
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.apiKey}`,
-    };
-
-    return this.httpService.post(this.apiUrl, data, { headers }).pipe(
-      catchError((error: AxiosError) => {
-        console.error('Axios error:', error.response?.data || error.message);
-        throw new Error('Failed to generate response');
-      }),
-    );
+    try {
+      const chatCompletion: OpenAI.Chat.ChatCompletion =
+        await this.openai.chat.completions.create(params);
+      return chatCompletion.choices[0].message;
+    } catch (error) {
+      this.logger.error(
+        `Failed to generate response: ${JSON.stringify(
+          error.response?.data || error.message,
+        )}`,
+      );
+      throw new Error('Failed to generate response');
+    }
   }
 }
